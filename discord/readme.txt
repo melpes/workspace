@@ -1,0 +1,1 @@
+{0.user} ... .format(client) : 디코봇 아이디

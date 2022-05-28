@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+</head>
+<script>
+    const fs = require('fs');
+
+    var number = 0
+    function writing() {
+        document.write("오늘 푸쉬업 횟수 :" + number)
+    }
+
+    function button1_click() {
+        number += 5
+        fs.writeFile("html/excer_date/" + "제목", number);
+    }
+</script>
+<body>
+    <div>
+        <h1 style="text-align:center">Hello, {{user_name}}.<br></br>Today is {{year}}/{{month}}/{{day}}!</h1>
+        <div>
+            <h3 style="text-align:center">푸쉬업</h3>
+            <div style="text-align:center">
+                <div>
+                    <script>
+                        writing()
+                    </script>
+                </div>
+                <div>
+                    <button id='test-button' onclick="button1_click()" style="width: 150px; height: 70px; font-size: 50px; text-align:center;" type="button">
+                        + 5
+                    </button>
+                </div>
+                <div>
+                    <button onlcick="remove" style="width: 150px; height: 70px; font-size: 50px; text-align:center;" type="button">
+                        - 5
+                    </button>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</body>
+</html>

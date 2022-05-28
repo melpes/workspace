@@ -1,0 +1,34 @@
+from PyQt5.QtGui import QColor
+from PyQt5.QtWidgets import *
+
+self.setLayout(something)
+# something 레이아웃을 self 레이아웃 속에 배치(self로 지정할 경우 위젯을 기준으로 함)
+
+QHBoxLayout()
+QVBoxLayout()
+# 각각 수평 배치 레이아웃, 수직 배치 레이아웃
+QGroupBox("레이아웃 이름")
+# 여러 레이아웃을 뭉쳐 넣을 수 있는 그룹박스. 제목을 넣을 수 있다.
+QRadioButton("텍스트", 부모 위젯)
+# 하나만 선택할 수 있는 라디오 버튼 레이아웃
+self.clicked.connect(something)
+# radiobutton 등의 self를 선택할 시 something에 연결됨(실행됨)
+left.addWidget(gb)
+# left라는 위젯 내에 gb라는 위젯을 추가 ( setLayout과의 차이점은 pass )
+QGridLayout()
+# n * m 표처럼 공간을 만든다. QHBoxLayout과 QVBoxLayout의 합.
+# addWidget(레이아웃, y축, x축)으로 추가하며 x, y는 0부터 시작한다.
+QLabel("이름")
+# 이름으로 한 칸을 차지한다.
+QComboBox()
+# 한 칸을 차지하며 누르면 아래로 확장되어 슬라이드를 통해 많은 선택지 중 하나를 고를 수 있음. 
+# addItem("항목")으로 항목을 추가할 수 있다.
+QPushButton()
+# 눌러서 신호를 보낼 수 있는 흔한 버튼이다.
+setStyleSheet()
+# 라벨, 버튼 등의 스타일을 꾸밀 수 있다. 문자열로 color, border-style, border-width, border-color,
+# border-radius, background-color 등의 설정을 할 수 있다. 
+# 사용법은 color: 색; border-style: solid; 식이다. 
+# 참고로 색은 red, green / #FFFFFF / rgb(0, 0, 0) 모두 가능
+QColor(0, 0, 0)
+# 색을 정할 수 있는 듯하다. 기본적으로 rgb를 지원하며 다른 건 모르겠다.
