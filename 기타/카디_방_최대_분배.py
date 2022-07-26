@@ -66,9 +66,6 @@ def move(nodes) -> None:
         for y in range(dim[1]):
             nodes[x, y].value = round(nodes[x, y].pre_value, 3)
 
-class NoneConservation(Exception):
-    pass
-
 class Node:
     def __init__(self, coor : tuple) -> None:
         self.to_dir = {}
@@ -86,9 +83,8 @@ class Node:
         self._value = v
 
     def check(self):
-        if sum(self.to_dir.values()) != 1:
-            print("todir", self.to_dir.values())
-            raise NoneConservation # assert로 바꾸기
+        assert sum(self.to_dir.values()) == 1, "\
+    NoneConservation : sum of Node.to_dir.keys() is not 1."
             
 
 
