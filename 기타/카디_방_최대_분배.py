@@ -13,23 +13,23 @@ def main() -> None:
     while True:
         print_node(nodes)
         move(nodes)
-        input()
+        # input()
 
 class Node:
     def __init__(self, coor : tuple) -> None:
         self.to_dir = {}
         self.node_num = coor
         self._values = list()
-        self.pre_value = list()
+        self.pre_values = list()
     
     @property
-    def value(self):
+    def values(self):
         self.check()
-        return self._value
+        return self._values
 
-    @value.setter
-    def value(self, v):
-        self._value = v
+    @values.setter
+    def values(self, v):
+        self._valus = v
 
     def check(self):
         assert sum(self.to_dir.values()) == 1, "\
@@ -74,30 +74,32 @@ def set_nodes_dir(nodes) -> None:
     nodes[2, 2].to_dir[2-1, 2-1] = 1
 
 def set_nodes_value(nodes) -> None:
-    nodes[0, 1].value.append(Unit())
-    nodes[2, 1].value.append(Unit())
+    nodes[0, 1].values.append(Unit())
+    nodes[2, 1].values.append(Unit())
 
 def print_node(node : np) -> None:
     for y in range(node.shape[1]):
         for x in range(node.shape[0]):
-            print(len(node[x][y].value), end="\t")
+            print(len(node[x][y].values), end="\t")
         print()
 
 def move(nodes) -> None:
     dim = nodes.shape
     for x in range(dim[0]):
         for y in range(dim[1]):
-            nodes[x, y].pre_value = list()
+            nodes[x, y].pre_values = list()
 
     for x in range(dim[0]):
         for y in range(dim[1]):
-            for unit in nodes[x, y].value:
+            for unit in nodes[x, y].values:
                 coor = unit.cal_coor(nodes[x, y].to_dir)
-                nodes[coor].pre_value = unit
+                nodes[coor].pre_values = unit
 
     for x in range(dim[0]):
         for y in range(dim[1]):
-            nodes[x, y].value = nodes[x, y].pre_value
+            nodes[x, y].values = nodes[x, y].pre_values
+            print(f"{x, y}", nodes[x, y].values)
+            print(nodes[x, y].pre_values)
 
 if __name__ == "__main__":
     main()
