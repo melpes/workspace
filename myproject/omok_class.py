@@ -64,14 +64,14 @@ class Board:
             yield v
 
         for i in np.arange(0, size):
-            yield self.stone_info[0:1+i, size-1-i:size].diagonal()
+            yield self.stone_info[0:1 + i, size - (1+i):size].diagonal()
         for i in np.arange(size-2, -1, -1):
-            yield self.stone_info.T[0:1+i, size-1-i:size].diagonal()
+            yield self.stone_info.T[0:1+i, size - (1+i):size].diagonal()
             
         for i in np.arange(0, size):
-            yield self.stone_info[:,::-1][0:1+i, size-1-i:size].diagonal()
+            yield self.stone_info[:,::-1][0:1+i, size - (1+i):size].diagonal()
         for i in np.arange(size-2, -1, -1):
-            yield self.stone_info.T[::-1][0:1+i, size-1-i:size].diagonal()
+            yield self.stone_info.T[::-1][0:1+i, size - (1+i):size].diagonal()
 
     def print(self) -> None:
         visualized = self.stone_info.copy().astype(str)
@@ -137,7 +137,7 @@ class Ai:
 
         stack = 0
         for i in range(line_markers.shape[0]):
-            if line_markers["info"][i] == self.turn:
+            if line_markers.loc[i, "info"] == self.turn:
                 stack += 1
             elif stack != 0:
                 self.spreading_marker(line_markers, i, stack)
@@ -153,34 +153,36 @@ class Ai:
         # ex) __OO_OX__에 대해 score level : 23OO3X__, empty level : 11OO_OX__
 
         for blank in range(2):
+            idx = i + blank
             if dir == -1:
                 break
             if blank_entry > blank:
                 continue
             if i + blank >= line_markers.shape[0]:
                 break
-            if line_markers["info"][i + blank] == -1 * self.turn:
+            if line_markers.loc[idx, "info"] == -1 * self.turn:
                 break
-            if line_markers["info"][i + blank] == self.turn:
+            if line_markers.loc[idx, "info"] == self.turn:
                 self.spreading_marker(line_markers, i + 1, stack, dir=1, blank_entry=blank)
                 break
-            line_markers["score level"][i + blank] += stack
-            line_markers["empty level"][i + blank] += blank
+            line_markers.loc[idx, "score level"] += stack
+            line_markers.loc[idx, "empty level"] += blank
 
         for blank in range(2):
+            idx = (i - 1 - stack) - blank
             if dir == 1:
                 break
             if blank_entry > blank:
                 continue
             if (i - 1 - stack) - blank < 0:
                 break
-            if line_markers["info"][(i - 1 - stack) - blank] == -1 * self.turn:
+            if line_markers.loc[idx, "info"] == -1 * self.turn:
                 break
-            if line_markers["info"][(i - 1 - stack) - blank] == self.turn:
+            if line_markers.loc[idx, "info"] == self.turn:
                 self.spreading_marker(line_markers, i - 1, stack, dir=-1, blank_entry=blank)
                 break
-            line_markers["score level"][(i - 1 - stack) - blank] += stack
-            line_markers["empty level"][(i - 1 - stack) - blank] += blank
+            line_markers.loc[idx, "empty level"] += blank
+            line_markers.loc[idx, "score level"] += stack
 
     def line_range(self) -> list:
         size = self.stone_info.shape[0]
