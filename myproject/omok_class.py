@@ -3,17 +3,15 @@ import numpy as np
 
 def main() -> None:
     board = Board(10)
-    for i in range(5):
-        board.put_stone((i+3, -i+8))
+    for i in range(3):
+        board.put_stone((i+3, i+3))
+        board.put_stone((i+4, i+3))
     board.print()
     board.check_winner()
 
     ai = Ai(board)
     # ai.marking(np.array([0, 0, 1, -1, 1, 0, 1, 0, 1, 0]))
     ai.judgment()
-    idx = pd.IndexSlice
-    print(ai.full_markers.loc[idx[:, 1], idx[:, 'a']])
-    print(ai.full_markers.iloc[idx[:, 1], idx[:, 0]])
 
     ai.print()
 
@@ -108,12 +106,31 @@ class Ai:
             1 : 'd'
         }
         visualized = self.board.stone_info.copy().astype(str)
-        visualized[np.where(visualized == '-1')] = '○'
-        visualized[np.where(visualized == '1')] = '●'
-        visualized[np.where(visualized == '0')] = ' '
-        # for i in range(1, 5):
-        #     print(np.where(self.full_markers.loc[:, ('a')] >= 1))
-        #     visualized[np.where(self.full_markers[:, (:, 'a')] >= 1)] = str(i + 1)
+        visualized[visualized == '-1'] = '○'
+        visualized[visualized == '1'] = '●'
+        visualized[visualized == '0'] = ' '
+
+        idx = pd.IndexSlice
+        for mark in ['a-', 'b-', 'c-', 'd-', 'a', 'b', 'c', 'd', 'is blocked']:
+            idx_of_mark1 = (self.full_markers.loc[idx[self.full_markers.index], idx[:, [mark]]] == 1).T.any().unstack()
+            idx_of_mark2 = (self.full_markers.loc[idx[self.full_markers.index], idx[:, [mark]]] >= 2).T.any().unstack()
+            if mark not in mark_dict.values():
+                match mark:
+                    case 'a-':
+                        mark = str(5)
+                    case 'b-':
+                        mark = str(4)
+                    case 'c-':
+                        mark = str(3)
+                    case 'd-':
+                        mark = str(2)
+                    case 'is blocked':
+                        mark = str(1)
+                    
+            visualized[idx_of_mark1] = mark
+            visualized[idx_of_mark2] = mark.upper()
+        
+
         for y in range(self.board.size_of_board):
             for x in range(self.board.size_of_board):
                 print(visualized[x, y], end=' ')
@@ -156,14 +173,14 @@ class Ai:
                         index = (j, i - j)
                         dir = '-xy'
                     case '-xy2':
-                        index = (i + 1, self.board.size_of_board - (j + 1))
+                        index = (i + j + 1, self.board.size_of_board - (j + 1))
                         dir = '-xy'
                 if line_markers.loc[j, "score level"] > 4 or line_markers.loc[j, "score level"] == 0:
                     continue
                 mark = mark_dict[line_markers.loc[j, "score level"]] + ('-' if line_markers.loc[j, "empty level"] >= 1 else '')
                 full_markers.loc[index, (dir, mark)] += 1
                 if line_markers.loc[j, "is blocked"] == True:
-                    full_markers.loc[index, (dir, mark)] = 1
+                    full_markers.loc[index, (dir, "is blocked")] = 1
         self.full_markers = full_markers
 
     def marking(self, line) -> pd.DataFrame:
