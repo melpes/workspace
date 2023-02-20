@@ -2,17 +2,31 @@ import pandas as pd
 import numpy as np
 
 def main() -> None:
-    board = Board(10)
-    for i in range(3):
-        board.put_stone((i+3, i+3))
-        board.put_stone((i+4, i+3))
+    with open("myproject\\omok\\board.txt", 'r') as file:
+        map = file.readlines()
+        assert len(map) == len(map[0].strip()), "board의 가로 길이와 세로 길이가 같아야 합니다!"
+        size = len(map)
+    board = Board(size)
+    for j in range(len(map)):
+        line = map[j].strip()
+        for i in range(len(line)):
+            if line[i] == '_':
+                continue
+            if line[i] == '0':
+                board.make_turn(-1)
+            elif line[i] == '1':
+                board.make_turn(1)
+            board.put_stone((i, j))
     board.print()
     board.check_winner()
 
     ai = Ai(board)
-    # ai.marking(np.array([0, 0, 1, -1, 1, 0, 1, 0, 1, 0]))
-    ai.judgment()
 
+    ai.judgment()
+    ai.print()
+
+    board.change_turn()
+    ai.judgment()
     ai.print()
 
 
@@ -57,6 +71,10 @@ class Board:
 
     def change_turn(self) -> None:
         self.turn *= -1
+    
+    def make_turn(self, color):
+        assert color == 1 or color == -1, f"올바른 color값이 아닙니다. color는 1 또는 -1이어야 합니다. color type : {type(color)}, color value : {color}"
+        self.turn = color
 
     def line_range(self) -> list:
         size = self.size_of_board
@@ -111,9 +129,10 @@ class Ai:
         visualized[visualized == '0'] = ' '
 
         idx = pd.IndexSlice
-        for mark in ['a-', 'b-', 'c-', 'd-', 'a', 'b', 'c', 'd', 'is blocked']:
-            idx_of_mark1 = (self.full_markers.loc[idx[self.full_markers.index], idx[:, [mark]]] == 1).T.any().unstack()
-            idx_of_mark2 = (self.full_markers.loc[idx[self.full_markers.index], idx[:, [mark]]] >= 2).T.any().unstack()
+        mark_sort = ['d-', 'd', 'c-', 'c', 'b-', 'b', 'a-', 'a']
+        for mark in mark_sort:
+            idx_of_mark1 = (self.full_markers.loc[idx[self.full_markers.index], idx[:, [mark]]] == 1).any(axis=1).unstack()
+            idx_of_mark2 = (self.full_markers.loc[idx[self.full_markers.index], idx[:, [mark]]].sum(axis=1) >= 2).unstack()
             if mark not in mark_dict.values():
                 match mark:
                     case 'a-':
@@ -126,11 +145,14 @@ class Ai:
                         mark = str(2)
                     case 'is blocked':
                         mark = str(1)
-                    
+
             visualized[idx_of_mark1] = mark
             visualized[idx_of_mark2] = mark.upper()
-        
 
+        if self.board.turn == 1:
+            print("Black turn")
+        else:
+            print("White turn")
         for y in range(self.board.size_of_board):
             for x in range(self.board.size_of_board):
                 print(visualized[x, y], end=' ')
@@ -149,20 +171,23 @@ class Ai:
         index = pd.MultiIndex.from_product([[i for i in range(self.board.size_of_board)]] * 2, names=['x', 'y'])
         columns = pd.MultiIndex.from_product([['x', 'y', 'xy', '-xy'], ['a', 'b', 'c', 'd', "a-", "b-", "c-", "d-", "is blocked"]])
         full_markers = pd.DataFrame(0, index=index, columns=columns)
-        print(full_markers)
 
-        for i, (line, dir) in enumerate(self.line_range()):
+        for i, (line, decide_index) in enumerate(self.line_range()):
             i %= self.board.size_of_board
             if line.size == 0:
                 continue
             line_markers = self.marking(line)
 
+            dir = ''
             for j in range(line_markers.shape[0]):
-                match dir:
+
+                match decide_index:
                     case 'x':
                         index = (i, j)
+                        dir = 'x'
                     case 'y':
                         index = (j, i)
+                        dir = 'y'
                     case 'xy1':
                         index = (j, self.board.size_of_board + j - (i + 1))
                         dir = 'xy'
@@ -181,6 +206,7 @@ class Ai:
                 full_markers.loc[index, (dir, mark)] += 1
                 if line_markers.loc[j, "is blocked"] == True:
                     full_markers.loc[index, (dir, "is blocked")] = 1
+
         self.full_markers = full_markers
 
     def marking(self, line) -> pd.DataFrame:
