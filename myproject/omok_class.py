@@ -11,11 +11,10 @@ def main() -> None:
     ai = Ai(board)
     # ai.marking(np.array([0, 0, 1, -1, 1, 0, 1, 0, 1, 0]))
     ai.judgment()
-    print(np.where(ai.full_markers >= 1))
-    for i in range(len(np.where(ai.full_markers >= 1)[0])):
-        print(np.where(ai.full_markers >= 1)[0][i] % 10, np.where(ai.full_markers >= 1)[1][i] % 10)
-    # for i in ['x', 'y', 'xy', '-xy']:
-    #     print("loc", ai.full_markers.loc[:, (i, 'a')], "?", sep="\n")
+    idx = pd.IndexSlice
+    print(ai.full_markers.loc[idx[:, 1], idx[:, 'a']])
+    print(ai.full_markers.iloc[idx[:, 1], idx[:, 0]])
+
     ai.print()
 
 
