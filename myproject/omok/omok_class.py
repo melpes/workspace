@@ -29,6 +29,8 @@ def main() -> None:
     ai.judgment()
     ai.print()
 
+    ai.calcul_weight()
+
 
 class Board:
     BLANK, BLACK, WHITE, BLOCKED = 0, 1, -1, 2
@@ -112,6 +114,13 @@ class Ai:
         WHITE : "WHITE",
         BLOCKED : "BLOCKED"
     }
+
+    def calcul_weight(self):
+        markers_9 = pd.DataFrame()
+        idx = pd.IndexSlice
+        for mark in ['a', 'b', 'c', 'd', 'a-', 'b-', 'c-', 'd-', 'is blocked']:
+            markers_9[mark] = self.full_markers.loc[idx[:, :], idx[:, mark]].sum(axis=1)
+        
 
     def __init__(self, board) -> None:
         self.board : Board = board
