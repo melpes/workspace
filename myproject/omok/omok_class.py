@@ -20,7 +20,7 @@ def main() -> None:
     board.print()
     board.check_winner()
 
-    ai = Ai(board)
+    ai = Ai(board, {"blocked" : 4, "blanked" : 3})
 
     ai.judgment()
     ai.print()
@@ -118,12 +118,28 @@ class Ai:
     def calcul_weight(self):
         markers_9 = pd.DataFrame()
         idx = pd.IndexSlice
-        for mark in ['a', 'b', 'c', 'd', 'a-', 'b-', 'c-', 'd-', 'is blocked']:
-            markers_9[mark] = self.full_markers.loc[idx[:, :], idx[:, mark]].sum(axis=1)
+        mark_dict = {
+            'a' : 30,
+            'b' : 20,
+            'c' : 10,
+            'd' : 0
+        }
+        # markers_9 = self.full_markers.copy()
+        # markers_9.loc[(3, 1), ('x', 'b')] = 7
+        # for mark in mark_dict.keys():
+        #     markers_9[markers_9 >= 1] += mark_dict
+        # print(markers_9.loc[(3, 1)])
+
+        # for mark in mark_dict.keys():
+        #     markers_9[mark] = self.full_markers.loc[idx[:, :], idx[:, mark]].sum(axis=1)
+        # markers_9[markers_9 >= 1] += mark_dict[mark]
+        # print(markers_9)
+
         
 
-    def __init__(self, board) -> None:
+    def __init__(self, board, weight) -> None:
         self.board : Board = board
+        self.weight : dict = weight
 
     def print(self):
         mark_dict = {
@@ -178,7 +194,7 @@ class Ai:
         }
 
         index = pd.MultiIndex.from_product([[i for i in range(self.board.size_of_board)]] * 2, names=['x', 'y'])
-        columns = pd.MultiIndex.from_product([['x', 'y', 'xy', '-xy'], ['a', 'b', 'c', 'd', "a-", "b-", "c-", "d-", "is blocked"]])
+        columns = pd.MultiIndex.from_product([['x', 'y', 'xy', '-xy'], ['a', 'b', 'c', 'd']])
         full_markers = pd.DataFrame(0, index=index, columns=columns)
 
         for i, (line, decide_index) in enumerate(self.line_range()):
@@ -211,10 +227,10 @@ class Ai:
                         dir = '-xy'
                 if line_markers.loc[j, "score level"] > 4 or line_markers.loc[j, "score level"] == 0:
                     continue
-                mark = mark_dict[line_markers.loc[j, "score level"]] + ('-' if line_markers.loc[j, "empty level"] >= 1 else '')
-                full_markers.loc[index, (dir, mark)] += 1
-                if line_markers.loc[j, "is blocked"] == True:
-                    full_markers.loc[index, (dir, "is blocked")] = 1
+                mark = mark_dict[line_markers.loc[j, "score level"]]
+                full_markers.loc[index, (dir, mark)] += 10
+                full_markers.loc[index, (dir, mark)] -= line_markers.loc[j, "empty level"] * self.weight["blanked"]
+                full_markers.loc[index, (dir, mark)] -= line_markers.loc[j, "is blocked"] * self.weight["blocked"]
 
         self.full_markers = full_markers
 
@@ -288,6 +304,8 @@ class Ai:
                 line_markers.loc[idx, "is blocked"] = True
 
     def spreading_blocked(self, line_markers, i, dir):
+        if i + dir < 0 or i + dir >= line_markers.shape[0]:
+            return
         if line_markers.loc[i + dir, "info"] != self.board.turn:
             return
         line_markers.loc[i + dir, "is blocked"] = True
