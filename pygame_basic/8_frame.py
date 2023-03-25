@@ -18,7 +18,7 @@ clock = pygame.time.Clock()
 # 1. 사용자 게임 초기화 (배경 화면, 게임 이미지, 좌표, 속도, 캐릭터, 폰트 등)
 
 running = True
-goal_fps = 300
+goal_fps = 30
 while running:
     dt = clock.tick(goal_fps)
 
